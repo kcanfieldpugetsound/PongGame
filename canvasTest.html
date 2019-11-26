@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Canvas Test</title>
+	<style type="text/css">
+		canvas {
+			background-color: black;
+		}
+	</style>
+</head>
+<body>
+
+<canvas width="300px" height="400px">
+	
+</canvas>
+
+<script>
+  let canvas = document.querySelector("canvas");
+  let context = canvas.getContext("2d");
+  context.fillStyle = "white";
+  
+    var paddleLeft = {};
+	  paddleLeft.x=5;
+	  paddleLeft.y=10;
+	  paddleLeft.width = 10;
+	  paddleLeft.height = 50;
+
+  function drawPaddleLeft()
+  {
+	context.fillRect(paddleLeft.x, paddleLeft.y, paddleLeft.width, paddleLeft.height);	
+  }
+
+   var paddleRight = {};
+	  paddleRight.x=285;
+	  paddleRight.y=10;
+	  paddleRight.width = 10;
+	  paddleRight.height = 50;
+
+  function drawPaddleRight()
+  {
+	context.fillRect(paddleRight.x, paddleRight.y, paddleRight.width, paddleRight.height);	
+  }
+  
+  function drawNet()
+  {
+  	context.fillRect(149, 0, 2, 400);
+  }
+
+  
+  var ball = {};
+  ball.x=150;
+  ball.y=200;
+  ball.width = 10;
+  ball.height = 10;
+
+  ball.velocityX = -5;
+  ball.velocityY = -2;
+
+  function drawBall()
+  {
+	context.fillStyle = "white";
+	context.fillRect(ball.x, ball.y, ball.width, ball.height);
+  }
+
+  drawBall();
+
+  function clearCanvas()
+  {
+  	context.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function drawGame()
+  {
+  	//erase canvas
+  	clearCanvas();
+  	//draw paddles
+  	//draw ball
+  	drawBall();
+  	drawNet();
+  	drawPaddleLeft();
+  	drawPaddleRight();
+  	//draw score
+
+  }
+
+
+var myVar = setInterval(myTimer, 30);
+
+function myTimer()
+{
+	ball.x = ball.x + ball.velocityX;
+	ball.y = ball.y + ball.velocityY;
+
+	drawGame();
+
+	if(checkHitRight())
+	{
+		ball.velocityX = (-1) * (ball.velocityX);
+	}
+	if(checkHitLeft())
+	{
+		ball.velocityX = (-1) * (ball.velocityX);
+	}
+	if(checkHitTable())
+		ball.velocityY = (-1) * ball.velocityY;
+
+	console.log(ball.velocityX);
+
+}
+
+
+function checkHitLeft()
+{
+	var ballX = ball.x;
+	var ballY = ball.y;
+	if (ball.x<25)
+	{
+		var ballMatchesPaddleLeftX = (ballX >= paddleLeft.x &&  ballX <= (paddleLeft.x + paddleLeft.width+1));
+		var ballMatchesPaddleLeftY = (ballY+ball.height >= paddleLeft.y && ballY < ( paddleLeft.y + paddleLeft.height) );
+
+		//alert("x match: "+ballMatchesPaddleLeftX);
+		//alert("y match: "+ballMatchesPaddleLeftY);
+		
+		if(ballMatchesPaddleLeftX && ballMatchesPaddleLeftY)
+		{
+			return true;
+		}
+		else
+		{
+			//if(ballY>250)
+				//alert("ball was at ("+ballX+","+ballY+")");
+			return false;
+
+		}
+	}
+	else
+		return false;
+}
+
+
+function checkHitRight()
+{
+	if(ball.x>275)
+	{
+		var ballMatchesPaddleRightX = (ball.x + ball.width >= paddleRight.x && paddleRight.x > ball.x);
+		var ballMatchesPaddleRightY = (ball.y + ball.height >= paddleRight.y && ball.y < ( paddleRight.y + paddleRight.height) );
+
+		//alert("x match: "+ballMatchesPaddleLeftX);
+		//alert("y match: "+ballMatchesPaddleLeftY);
+		
+		if(ballMatchesPaddleRightX && ballMatchesPaddleRightY)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else return false;
+
+}
+
+
+
+function checkHitTable() 
+{
+	return checkHitTableTop() || checkHitTableBottom();
+}
+
+
+function checkHitTableTop()
+{
+	return ball.y <= 0 && ball.x > 0 && ball.x < canvas.width;
+}
+
+
+function checkHitTableBottom()
+{
+	return ball.y + ball.height >=canvas.height && ball.x > 0 && ball.x < canvas.width;
+}
+
+
+
+document.addEventListener('keydown', logKey);
+
+function logKey(e) {
+  if(e.code=="KeyW")
+  	paddleLeft.y=paddleLeft.y-20;
+  if(e.code=="KeyS")
+  	paddleLeft.y=paddleLeft.y+20;
+  if(e.code=="ArrowUp")
+  	paddleRight.y=paddleRight.y-20;
+  if(e.code=="ArrowDown")
+  	paddleRight.y=paddleRight.y+20;
+}
+  
+</script>
+</body>
+</html>
