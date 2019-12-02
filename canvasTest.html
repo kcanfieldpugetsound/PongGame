@@ -10,13 +10,35 @@
 </head>
 <body>
 
-<canvas width="300px" height="400px">
+<canvas width="300px" height="200px">
 	
 </canvas>
+
+<p>p1: <span id="p1Score"></span> </p>
+<p>p2: <span id="p2Score"></span> </p>
+
+
+<p>Player 1 paddle color: <input type="color" name="p1c" onchange="setP1C(this.value)"></p>
+
+<p>Player 2 paddle color: <input type="color" name="p2c" onchange="setP2C(this.value)"></p>
 
 <script>
   let canvas = document.querySelector("canvas");
   let context = canvas.getContext("2d");
+  const GameEndScore = 2;
+
+
+  var p1 = 0;
+  var p2 = 0;
+
+
+  var PADDLE_MOVE_SPEED = 5;
+
+  var displayP1 = document.getElementById("p1Score");
+  var displayP2 = document.getElementById("p2Score");
+
+  
+
   context.fillStyle = "white";
   
     var paddleLeft = {};
@@ -24,36 +46,34 @@
 	  paddleLeft.y=10;
 	  paddleLeft.width = 10;
 	  paddleLeft.height = 50;
+	  paddleLeft.color = "#ffffff";
 
-  function drawPaddleLeft()
-  {
-	context.fillRect(paddleLeft.x, paddleLeft.y, paddleLeft.width, paddleLeft.height);	
-  }
-
-   var paddleRight = {};
+	var paddleRight = {};
 	  paddleRight.x=285;
 	  paddleRight.y=10;
 	  paddleRight.width = 10;
 	  paddleRight.height = 50;
+	  paddleRight.color = "#ffffff";
 
-  function drawPaddleRight()
-  {
-	context.fillRect(paddleRight.x, paddleRight.y, paddleRight.width, paddleRight.height);	
-  }
-  
-  function drawNet()
-  {
-  	context.fillRect(149, 0, 2, 400);
-  }
+
+function setP1C(newLeftColor)
+{
+	paddleLeft.color = newLeftColor;
+}
+
+function setP2C(newRightColor)
+{
+	paddleRight.color = newRightColor;
+}
 
   
   var ball = {};
   ball.x=150;
-  ball.y=200;
+  ball.y=100;
   ball.width = 10;
   ball.height = 10;
 
-  ball.velocityX = -5;
+  ball.velocityX = -2;
   ball.velocityY = -2;
 
   function drawBall()
@@ -62,7 +82,30 @@
 	context.fillRect(ball.x, ball.y, ball.width, ball.height);
   }
 
-  drawBall();
+  function drawPaddleLeft()
+  {
+  	context.fillStyle = paddleLeft.color;
+	context.fillRect(paddleLeft.x, paddleLeft.y, paddleLeft.width, paddleLeft.height);	
+	context.fillStyle = "white";
+  }
+
+  function drawPaddleRight()
+  {
+  	context.fillStyle = paddleRight.color;
+	context.fillRect(paddleRight.x, paddleRight.y, paddleRight.width, paddleRight.height);	
+	context.fillStyle = "white";
+  }
+  
+  function drawNet()
+  {
+  	context.fillRect(149, 0, 2, 200);
+  }
+
+  function drawScores()
+  {
+  	  displayP1.innerHTML = p1;
+      displayP2.innerHTML = p2;
+  }
 
   function clearCanvas()
   {
@@ -71,43 +114,33 @@
 
   function drawGame()
   {
-  	//erase canvas
-  	clearCanvas();
-  	//draw paddles
-  	//draw ball
-  	drawBall();
-  	drawNet();
-  	drawPaddleLeft();
-  	drawPaddleRight();
-  	//draw score
-
+	  	//erase canvas
+	  	clearCanvas();
+	  	//draw paddles
+	  	//draw ball
+	  	drawBall();
+	  	drawNet();
+	  	drawPaddleLeft();
+	  	drawPaddleRight();
+	  	//draw score
+	  	drawScores();
   }
 
 
-var myVar = setInterval(myTimer, 30);
-
-function myTimer()
+function resetBall()
 {
-	ball.x = ball.x + ball.velocityX;
-	ball.y = ball.y + ball.velocityY;
-
-	drawGame();
-
-	if(checkHitRight())
-	{
-		ball.velocityX = (-1) * (ball.velocityX);
-	}
-	if(checkHitLeft())
-	{
-		ball.velocityX = (-1) * (ball.velocityX);
-	}
-	if(checkHitTable())
-		ball.velocityY = (-1) * ball.velocityY;
-
-	console.log(ball.velocityX);
+	ball.x = (canvas.width/2)-(ball.width/2);
+	ball.y = (canvas.height/2)-(ball.height/2);
+	ball.velocityX = -5;
+  	ball.velocityY = -2;
 
 }
 
+function resetScores()
+{
+	p1=0;
+	p2=0;
+}
 
 function checkHitLeft()
 {
@@ -127,10 +160,7 @@ function checkHitLeft()
 		}
 		else
 		{
-			//if(ballY>250)
-				//alert("ball was at ("+ballX+","+ballY+")");
 			return false;
-
 		}
 	}
 	else
@@ -144,9 +174,6 @@ function checkHitRight()
 	{
 		var ballMatchesPaddleRightX = (ball.x + ball.width >= paddleRight.x && paddleRight.x > ball.x);
 		var ballMatchesPaddleRightY = (ball.y + ball.height >= paddleRight.y && ball.y < ( paddleRight.y + paddleRight.height) );
-
-		//alert("x match: "+ballMatchesPaddleLeftX);
-		//alert("y match: "+ballMatchesPaddleLeftY);
 		
 		if(ballMatchesPaddleRightX && ballMatchesPaddleRightY)
 		{
@@ -160,8 +187,6 @@ function checkHitRight()
 	else return false;
 
 }
-
-
 
 function checkHitTable() 
 {
@@ -180,19 +205,121 @@ function checkHitTableBottom()
 	return ball.y + ball.height >=canvas.height && ball.x > 0 && ball.x < canvas.width;
 }
 
+drawGame();
+gameInProgress = false;
+var myVar = setInterval(playGame, 30);
+
+
+function playGame()
+{
+	if(gameInProgress)
+	{
+		ball.x = ball.x + ball.velocityX;
+		ball.y = ball.y + ball.velocityY;
+
+		drawGame();
+
+		if(checkHitRight())
+		{
+			ball.velocityX = (-1) * (ball.velocityX);
+		}
+		if(checkHitLeft())
+		{
+			ball.velocityX = (-1) * (ball.velocityX);
+		}
+		if(checkHitTable())
+			ball.velocityY = (-1) * ball.velocityY;
+
+		
+		if(ball.x < 0)
+		{
+			gameInProgress = false;
+			p2++;
+			drawScores();
+			resetBall();
+			drawGame();
+		}
+
+		if(ball.x > canvas.width)
+		{
+			gameInProgress = false;
+			p1++;
+			drawScores();
+			resetBall();
+			drawGame();
+		}
+
+		if(p1>=GameEndScore || p2>=GameEndScore)
+		{
+			gameInProgress=false;
+			alert("Player "+ (p1>p2 ? "1":"2")+" wins!");
+			resetScores();
+			drawGame();
+		}
+	}
+}
+
+
+function movePaddleLeftUp() {
+	if(paddleLeft.y-PADDLE_MOVE_SPEED < 0)
+		paddleLeft.y = 0
+	else
+		paddleLeft.y=paddleLeft.y-PADDLE_MOVE_SPEED;
+}
+
+function movePaddleLeftDown() {
+
+	if (paddleLeft.y+paddleLeft.height+PADDLE_MOVE_SPEED > canvas.height)
+		paddleLeft.y = canvas.height - paddleLeft.height;
+	else
+		paddleLeft.y=paddleLeft.y+PADDLE_MOVE_SPEED;
+}
+
+function movePaddleRightUp() {
+	if(paddleRight.y-PADDLE_MOVE_SPEED < 0)
+		paddleRight.y = 0
+	else
+		paddleRight.y=paddleRight.y-PADDLE_MOVE_SPEED;
+}
+
+function movePaddleRightDown() {
+	if (paddleRight.y+paddleRight.height+PADDLE_MOVE_SPEED > canvas.height)
+		paddleRight.y = canvas.height - paddleRight.height;
+	else
+		paddleRight.y=paddleRight.y+PADDLE_MOVE_SPEED;
+}
 
 
 document.addEventListener('keydown', logKey);
 
-function logKey(e) {
-  if(e.code=="KeyW")
-  	paddleLeft.y=paddleLeft.y-20;
-  if(e.code=="KeyS")
-  	paddleLeft.y=paddleLeft.y+20;
-  if(e.code=="ArrowUp")
-  	paddleRight.y=paddleRight.y-20;
-  if(e.code=="ArrowDown")
-  	paddleRight.y=paddleRight.y+20;
+function logKey(e)
+{
+  if(gameInProgress)
+  {
+  	  if(e.code=="KeyW")
+	  	movePaddleLeftUp();
+	  if(e.code=="KeyS")
+	  	movePaddleLeftDown();
+	  if(e.code=="ArrowUp")
+	  	movePaddleRightUp();
+	  if(e.code=="ArrowDown")
+	  	movePaddleRightDown();
+  }
+
+  if(e.code=="KeyG")
+  	gameInProgress = ! gameInProgress;
+}
+
+document.addEventListener("touchstart", touchHandler);
+document.addEventListener("touchmove", touchHandler);
+
+function touchHandler(e) {
+    if(e.touches) {
+        playerX = e.touches[0].pageX - canvas.offsetLeft - playerWidth / 2;
+        playerY = e.touches[0].pageY - canvas.offsetTop - playerHeight / 2;
+        console.log( "Touch: "+ " x: " + playerX + ", y: " + playerY);
+        e.preventDefault();
+    }
 }
   
 </script>
